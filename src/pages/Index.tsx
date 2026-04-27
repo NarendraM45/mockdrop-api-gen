@@ -1,16 +1,28 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Navbar } from "@/components/mockdrop/Navbar";
+import { Hero } from "@/components/mockdrop/Hero";
+import { Editor } from "@/components/mockdrop/Editor";
+import { HowItWorks } from "@/components/mockdrop/HowItWorks";
+import { Features } from "@/components/mockdrop/Features";
+import { ActivityLog } from "@/components/mockdrop/ActivityLog";
+import { Footer } from "@/components/mockdrop/Footer";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const [activityTrigger, setActivityTrigger] = useState(0);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main>
+        <Hero />
+        <Editor onCreated={() => setActivityTrigger((v) => v + 1)} />
+        <HowItWorks />
+        <Features />
+        <ActivityLog trigger={activityTrigger} />
+      </main>
+      <Footer />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
