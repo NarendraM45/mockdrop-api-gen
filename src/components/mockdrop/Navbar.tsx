@@ -1,11 +1,13 @@
-import { Github, Zap, Menu, X } from "lucide-react";
+import { Github, Zap, Menu, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 
-export const Navbar = () => {
+export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isMac, setIsMac] = useState(false);
 
   useEffect(() => {
+    setIsMac(/Mac/i.test(navigator.platform));
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll);
@@ -23,31 +25,28 @@ export const Navbar = () => {
         scrolled ? "py-2.5" : "py-4"
       }`}
     >
-      <div className="container flex items-center justify-between">
-        <button
-          onClick={() => scrollTo("top")}
-          className="flex items-center gap-2 group"
-        >
+      <div className="container flex items-center justify-between gap-4">
+        <button onClick={() => scrollTo("top")} className="flex items-center gap-2 group shrink-0">
           <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
             <Zap className="h-4 w-4 text-primary-foreground" fill="currentColor" />
           </span>
           <span className="text-lg font-bold tracking-tight">MockDrop</span>
         </button>
 
-        <nav className="hidden md:flex items-center gap-2">
+        {onOpenPalette && (
           <button
-            onClick={() => scrollTo("how-it-works")}
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            onClick={onOpenPalette}
+            className="hidden md:flex items-center gap-2 flex-1 max-w-sm rounded-md card-border bg-elevated/60 px-3 py-1.5 text-xs text-muted-foreground hover:bg-elevated hover:border-primary/30 transition-all"
           >
-            How it works
+            <Search className="h-3.5 w-3.5" />
+            <span className="flex-1 text-left">Search or run a command…</span>
+            <kbd className="font-mono bg-background border border-border rounded px-1.5 py-0.5 text-[10px]">
+              {isMac ? "⌘" : "Ctrl"} K
+            </kbd>
           </button>
-          <button
-            onClick={() => scrollTo("features")}
-            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Features
-          </button>
+        )}
 
+        <nav className="hidden md:flex items-center gap-2">
           <a
             href="https://github.com"
             target="_blank"
@@ -60,7 +59,7 @@ export const Navbar = () => {
 
           <span className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated px-3 py-1 text-xs font-medium text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-            Free & Open Source
+            Free Forever
           </span>
 
           <button
@@ -82,6 +81,11 @@ export const Navbar = () => {
 
       {open && (
         <div className="md:hidden container mt-3 pb-3 flex flex-col gap-1 animate-fade-in">
+          {onOpenPalette && (
+            <button onClick={() => { onOpenPalette(); setOpen(false); }} className="text-left px-3 py-2 rounded-md hover:bg-elevated text-sm flex items-center gap-2">
+              <Search className="h-4 w-4" /> Command palette
+            </button>
+          )}
           <button onClick={() => scrollTo("how-it-works")} className="text-left px-3 py-2 rounded-md hover:bg-elevated text-sm">
             How it works
           </button>
