@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Clock, Infinity as InfinityIcon, ShieldCheck } from "lucide-react";
+import HeroBlobCanvas from "../HeroBlobCanvas";
 
 const PHRASES = ["Mock your endpoints.", "Test your UI now.", "Ship faster."];
 
@@ -72,6 +73,12 @@ const Counter = ({ end, suffix = "", duration = 1400 }: { end: number; suffix?: 
 };
 
 export const Hero = () => {
+  const badgeRef = useRef(null);
+  const h1Ref = useRef(null);
+  const subRef = useRef(null);
+  const statsRef = useRef(null);
+  const ctasRef = useRef(null);
+
   const scrollToEditor = () => {
     document.getElementById("editor")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -79,39 +86,34 @@ export const Hero = () => {
   return (
     <section
       id="top"
-      className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden"
+      style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', background: '#05010D', display: 'flex', flexDirection: 'column' }}
+      className="pt-32 pb-20 md:pt-40 md:pb-28"
     >
-      {/* Floating orbs */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-20 -left-20 h-[420px] w-[420px] rounded-full bg-primary opacity-20 blur-[100px] animate-float-1" />
-        <div className="absolute top-20 right-0 h-[380px] w-[380px] rounded-full bg-accent opacity-15 blur-[100px] animate-float-2" />
-        <div className="absolute bottom-0 left-1/3 h-[320px] w-[320px] rounded-full bg-primary-glow opacity-20 blur-[100px] animate-float-3" />
-      </div>
-
-      <div className="container relative">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="animate-fade-in stagger-1 inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+      <HeroBlobCanvas textRefs={{ badgeRef, h1Ref, subRef, ctasRef, statsRef }} />
+      <div className="container" style={{ position: 'relative', zIndex: 10 }}>
+        <div className="mx-auto max-w-3xl text-center md:text-left md:mx-0">
+          <div ref={badgeRef} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
             Now in public beta — Free forever
           </div>
 
-          <h1 className="animate-fade-in stagger-2 mt-6 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
+          <h1 ref={h1Ref} className="mt-6 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
             The fastest way to{" "}
             <span className="text-gradient-brand">mock an API</span>{" "}
             endpoint
           </h1>
 
-          <p className="animate-fade-in stagger-3 mt-6 text-lg md:text-xl text-muted-foreground min-h-[2em]">
+          <p ref={subRef} className="mt-6 text-lg md:text-xl text-muted-foreground min-h-[2em]">
             <Typewriter />
           </p>
 
-          <div className="animate-fade-in stagger-3 mt-8 flex flex-wrap items-center justify-center gap-2 md:gap-3">
+          <div ref={statsRef} className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
             <StatPill icon={<Clock className="h-3.5 w-3.5" />} label={<><Counter end={10} />ms response time</>} />
             <StatPill icon={<InfinityIcon className="h-3.5 w-3.5" />} label="Unlimited endpoints" />
             <StatPill icon={<ShieldCheck className="h-3.5 w-3.5" />} label="No signup needed" />
           </div>
 
-          <div className="animate-fade-in stagger-4 mt-10 flex justify-center">
+          <div ref={ctasRef} className="mt-10 flex justify-center md:justify-start">
             <button
               onClick={scrollToEditor}
               className="btn-primary group inline-flex items-center gap-2 rounded-md px-6 py-3.5 text-base font-semibold"
