@@ -1,5 +1,6 @@
-import { Github, Zap, Menu, X, Search } from "lucide-react";
+import { Github, Menu, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -27,9 +28,7 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
     >
       <div className="container flex items-center justify-between gap-4">
         <button onClick={() => scrollTo("top")} className="flex items-center gap-2 group shrink-0">
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
-            <Zap className="h-4 w-4 text-primary-foreground" fill="currentColor" />
-          </span>
+          <img src="/logo.png" alt="MockDrop Logo" className="h-8 w-8 object-contain" />
           <span className="text-lg font-bold tracking-tight">MockDrop</span>
         </button>
 
@@ -47,6 +46,7 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
         )}
 
         <nav className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           <a
             href="https://github.com"
             target="_blank"
@@ -70,13 +70,16 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
           </button>
         </nav>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="md:hidden p-2 rounded-md hover:bg-elevated"
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="p-2 rounded-md hover:bg-elevated"
+            aria-label="Toggle menu"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (

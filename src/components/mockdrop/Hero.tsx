@@ -97,7 +97,7 @@ export const Hero = () => {
             Now in public beta — Free forever
           </div>
 
-          <h1 ref={h1Ref} className="mt-6 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
+          <h1 ref={h1Ref} className="mt-6 text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-slate-200">
             The fastest way to{" "}
             <span className="text-gradient-brand">mock an API</span>{" "}
             endpoint
