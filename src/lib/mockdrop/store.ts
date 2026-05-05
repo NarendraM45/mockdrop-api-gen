@@ -124,4 +124,4 @@ export const store = {
 };
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
-export const endpointUrl = (id: string) => `https://api.mockdrop.dev/v1/${id}`;
+export const endpointUrl = (id: string) => `http://localhost/backend/api/${id}`;
