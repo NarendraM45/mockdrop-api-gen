@@ -1,4 +1,5 @@
 import { openDB, type IDBPDatabase } from "idb";
+import { API_URL } from "@/lib/api";
 
 export type Endpoint = {
   id: string;
@@ -124,4 +125,4 @@ export const store = {
 };
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
-export const endpointUrl = (id: string) => `http://localhost/backend/api/${id}`;
+export const endpointUrl = (hash: string) => `${API_URL}/api/serve.php?hash=${encodeURIComponent(hash)}`;

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { store, newId, type Endpoint, type RequestLog } from "@/lib/mockdrop/store";
 import { parseShareHash } from "@/lib/mockdrop/share";
+import { createEndpointOnBackend, isBackendHash } from "@/lib/api";
 import { toast } from "sonner";
 
 type Ctx = {
@@ -72,16 +73,37 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
   // Initial load + share-hash import
   useEffect(() => {
     (async () => {
-      const list = await refresh();
-      await refreshLogs();
+      const ensureOnBackend = async (e: Endpoint): Promise<Endpoint> => {
+        const updatedAt = Date.now();
+        try {
+          const data = await createEndpointOnBackend(e);
+          const hash = data.hash ?? e.id;
+
+          // If the backend returns a different hash, remove the old local record/logs.
+          if (hash !== e.id) await store.deleteEndpoint(e.id);
+
+          const next = { ...e, id: hash, updatedAt };
+          await store.saveEndpoint(next);
+          return next;
+        } catch (err) {
+          toast.error("Failed to create endpoint on backend");
+          // Keep the UI usable by falling back to local storage.
+          const next = { ...e, updatedAt };
+          await store.saveEndpoint(next);
+          return next;
+        }
+      };
+
+      let list = await refresh();
 
       const shared = parseShareHash();
       if (shared) {
         const e = blank({ ...shared, label: shared.label || "Shared endpoint" });
-        await store.saveEndpoint(e);
+        const saved = await ensureOnBackend(e);
         history.replaceState(null, "", window.location.pathname);
-        const next = await refresh();
-        setActiveId(e.id);
+        await refresh();
+        await refreshLogs();
+        setActiveId(saved.id);
         toast.success("Shared endpoint imported!");
         setLoading(false);
         return;
@@ -89,38 +111,87 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
 
       if (list.length === 0) {
         const e = blank();
-        await store.saveEndpoint(e);
+        const saved = await ensureOnBackend(e);
         await refresh();
-        setActiveId(e.id);
+        await refreshLogs();
+        setActiveId(saved.id);
       } else {
-        setActiveId(list[0].id);
+        // Hydrate any endpoints that were created by an older frontend version.
+        const invalid = list.filter((x) => !isBackendHash(x.id));
+        if (invalid.length) {
+          for (const e of invalid) {
+            await ensureOnBackend(e);
+          }
+          list = await refresh();
+        }
+        setActiveId(list[0]?.id ?? null);
+        await refreshLogs();
       }
       setLoading(false);
     })();
   }, [refresh, refreshLogs]);
 
   const upsertEndpoint = useCallback(async (e: Endpoint) => {
-    const updated = { ...e, updatedAt: Date.now() };
-    await store.saveEndpoint(updated);
-    await refresh();
-  }, [refresh]);
+    const updatedAt = Date.now();
+    try {
+      const data = await createEndpointOnBackend(e);
+      const hash = data.hash ?? e.id;
+
+      if (hash !== e.id) await store.deleteEndpoint(e.id);
+
+      const updated = { ...e, id: hash, updatedAt };
+      await store.saveEndpoint(updated);
+      await refresh();
+
+      if (activeId === e.id) setActiveId(hash);
+    } catch {
+      // Keep the endpoint editable even if the backend fails.
+      toast.error("Failed to create endpoint on backend");
+      const updated = { ...e, updatedAt };
+      await store.saveEndpoint(updated);
+      await refresh();
+    }
+  }, [refresh, activeId]);
 
   const createEndpoint = useCallback(async (partial: Partial<Endpoint> = {}) => {
     const e = blank(partial);
-    await store.saveEndpoint(e);
+    const updatedAt = Date.now();
+    let id = e.id;
+    try {
+      const data = await createEndpointOnBackend(e);
+      id = data.hash ?? id;
+    } catch {
+      toast.error("Failed to create endpoint on backend");
+    }
+
+    const saved = { ...e, id, updatedAt };
+    if (id !== e.id) await store.deleteEndpoint(e.id);
+
+    await store.saveEndpoint(saved);
     await refresh();
-    setActiveId(e.id);
-    return e;
+    setActiveId(saved.id);
+    return saved;
   }, [refresh]);
 
   const duplicateEndpoint = useCallback(async (id: string) => {
     const src = await store.getEndpoint(id);
     if (!src) return null;
     const dup = blank({ ...src, id: newId(), label: `${src.label} (copy)`, createdAt: Date.now() });
-    await store.saveEndpoint(dup);
+
+    const updatedAt = Date.now();
+    let nextId = dup.id;
+    try {
+      const data = await createEndpointOnBackend(dup);
+      nextId = data.hash ?? nextId;
+    } catch {
+      toast.error("Failed to create endpoint on backend");
+    }
+
+    const saved = { ...dup, id: nextId, updatedAt };
+    await store.saveEndpoint(saved);
     await refresh();
-    setActiveId(dup.id);
-    return dup;
+    setActiveId(saved.id);
+    return saved;
   }, [refresh]);
 
   const deleteEndpoint = useCallback(async (id: string) => {
