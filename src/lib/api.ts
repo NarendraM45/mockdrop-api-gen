@@ -1,6 +1,6 @@
 import type { Endpoint } from "@/lib/mockdrop/store";
 
-export const API_URL = "http://localhost:8000";
+export const API_URL = "https://mockdrop.duckdns.org";
 
 export const BACKEND_HASH_RE = /^[a-f0-9]{10}$/i;
 export const isBackendHash = (id: string) => BACKEND_HASH_RE.test(id);

@@ -1,5 +1,6 @@
-import { Github, Menu, X, Search } from "lucide-react";
+import { Github, Menu, X, Search, Users } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
@@ -62,9 +63,17 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
             Free Forever
           </span>
 
+          <Link
+            to="/developers"
+            className="ml-1 flex items-center gap-1.5 rounded-md border border-border bg-elevated/80 px-3 py-2 text-sm font-semibold text-foreground hover:bg-elevated hover:border-primary/40 hover:shadow-elevated transition-all"
+          >
+            <Users className="h-4 w-4 text-primary" />
+            Devs
+          </Link>
+
           <button
             onClick={() => scrollTo("editor")}
-            className="ml-2 btn-primary rounded-md px-4 py-2 text-sm font-semibold"
+            className="ml-1 btn-primary rounded-md px-4 py-2 text-sm font-semibold"
           >
             Get Started
           </button>
@@ -95,6 +104,13 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
           <button onClick={() => scrollTo("features")} className="text-left px-3 py-2 rounded-md hover:bg-elevated text-sm">
             Features
           </button>
+          <Link
+            to="/developers"
+            onClick={() => setOpen(false)}
+            className="px-3 py-2 rounded-md hover:bg-elevated text-sm flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" /> Devs
+          </Link>
           <a href="https://github.com" target="_blank" rel="noreferrer" className="px-3 py-2 rounded-md hover:bg-elevated text-sm flex items-center gap-2">
             <Github className="h-4 w-4" /> GitHub
           </a>
