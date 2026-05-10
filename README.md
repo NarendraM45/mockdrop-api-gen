@@ -1,33 +1,41 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150/000000/FFFFFF/?text=MockDrop" alt="MockDrop Logo" width="120" height="120">
+  <img src="./public/logo.png" alt="MockDrop Logo" width="120" height="120">
   <h1>MockDrop</h1>
-  <p><b>A Fast, Local-First Mock API & Payload Generator</b></p>
-  
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-blue)](https://reactjs.org/)
-  [![PHP](https://img.shields.io/badge/Backend-PHP%208.x-purple)](https://www.php.net/)
-  [![MySQL](https://img.shields.io/badge/Database-MySQL-orange)](https://www.mysql.com/)
+  <p><b>Instant mock APIs. Zero backend friction.</b></p>
+
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License"></a>
+  <a href="https://mockdrop.duckdns.org/"><img src="https://img.shields.io/badge/Live-mockdrop.duckdns.org-22c55e" alt="Live Website"></a>
+  <a href="https://react.dev/"><img src="https://img.shields.io/badge/Frontend-React%20%2B%20Vite-blue" alt="React + Vite"></a>
+  <a href="https://www.php.net/"><img src="https://img.shields.io/badge/Backend-PHP%208.x-purple" alt="PHP 8.x"></a>
+  <a href="https://www.mysql.com/"><img src="https://img.shields.io/badge/Database-MySQL-orange" alt="MySQL"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/FOSS-Yes-10b981" alt="FOSS"></a>
 </div>
 
 <br />
 
-**MockDrop** is a robust tool designed to let frontend developers and testers generate instant, ephemeral mock APIs. Build and orchestrate your payloads locally with a modern React UI, then instantly deploy them to a lightweight, highly-performant LAMP stack backend for your application to consume via HTTP.
+**MockDrop** is a fast, local-first platform for frontend developers and testers to generate temporary APIs in seconds.  
+Design payloads in a modern animated UI, keep workspace data in IndexedDB, and deploy real HTTP mock endpoints through a PHP + MySQL backend.
+
+🔗 **Live website:** [https://mockdrop.duckdns.org/](https://mockdrop.duckdns.org/)
+
+🌍 **Open Source (FOSS):** MockDrop is a free and open-source software project under the MIT License.
 
 ---
 
 ## ✨ Features
 
-### Frontend (React / Vite)
-- **Local-First Speed:** Workspaces, endpoint records, and logs are persisted seamlessly via IndexedDB before pushing to the cloud.
-- **Monaco Editor Integration:** Write, format, and validate complex JSON payloads directly in the browser with full syntax highlighting.
-- **Dynamic Endpoint Configuration:** Adjust HTTP status codes (200, 404, 500), customize custom response delays, toggle CORS policies, and set precise endpoint expiry intervals.
-- **Code Snippet Generator:** Instantly copy copy-paste ready `fetch`, `axios`, or `curl` snippets for your newly generated mock API.
+### 🎨 Frontend (React / Vite)
+- **Local-First Workflow:** Workspaces and logs are stored locally for instant speed.
+- **Monaco JSON Editor:** Rich JSON authoring, formatting, and validation.
+- **Dynamic Endpoint Controls:** HTTP status, response delay, CORS, and expiry options.
+- **Developer Productivity:** Command palette, shortcuts, and code snippets (`fetch`, `axios`, `curl`).
+- **Polished UI:** Smooth transitions, interactive cards, and a dedicated animated developers page.
 
-### Backend (PHP / MySQL)
-- **Ultra-Fast Routing:** Slim PHP 8.x endpoints optimized to return unencoded JSON instantaneously.
-- **Persistent Mocks:** Saves mock configurations, delay parameters, and payloads securely via PDO prepared statements.
-- **Analytics & IP Monitoring:** Logs requests, timestamps, actual response latency, and safely masks remote IP addresses for privacy limits.
-- **Self-Healing Cron Jobs:** Automatically cleans up endpoints surpassing their specified expiry time.
+### ⚙️ Backend (PHP / MySQL)
+- **Optimized PHP 8 Endpoints:** Fast create/serve/log/delete operations.
+- **Persistent Storage:** MySQL persistence via PDO prepared statements.
+- **Request Monitoring:** Endpoint-wise logs with timestamp and response time.
+- **Automated Cleanup:** Cron-based expiry cleanup for stale mocks.
 
 ---
 
@@ -35,61 +43,116 @@
 
 | Layer | Technologies |
 | --- | --- |
-| **Frontend** | React, Vite, Tailwind CSS, IndexedDB (`idb`), Monaco Editor |
-| **Backend API** | PHP 8.x, Vanilla Routing, `.htaccess` standard redirects |
-| **Database** | MySQL / MariaDB |
-| **Hosting** | Any typical LAMP Stack, cPanel, or DigitalOcean Droplet |
+| Frontend | React, Vite, TypeScript, Tailwind CSS, IndexedDB (`idb`), Monaco Editor |
+| Backend API | PHP 8.x, Apache (`.htaccess`), JSON endpoints |
+| Database | MySQL / MariaDB |
+| Hosting | AWS EC2 (`t3.micro`) + Apache + PHP + MySQL (LAMP) |
+
+---
+
+## ☁️ Deployment (Production)
+
+MockDrop is currently deployed on **AWS EC2 `t3.micro`**:
+
+- **Instance type:** `t3.micro`
+- **OS/Stack:** Ubuntu + Apache + PHP 8.x + MySQL
+- **Public URL:** [https://mockdrop.duckdns.org/](https://mockdrop.duckdns.org/)
+- **Routing:** Apache + `.htaccess` inside `backend/`
+- **Scheduled cleanup:** `cron` runs cleanup for expired endpoints
 
 ---
 
 ## 🚀 Quick Setup
 
-### 1. Backend / Database
-1. Copy the `/backend` folder to your server's web root (e.g., `/public_html` or `/var/www/html/backend`).
-2. Import `backend/db/schema.sql` into your MySQL instance via phpMyAdmin or the CLI.
-3. Rename `backend/.env.example` to `backend/.env` and update your database credentials.
-4. Set up the cleanup Cron Job on your server (runs every minute):
-   ```cron
-   * * * * * php /path/to/your/backend/cron/cleanup.php >> /dev/null 2>&1
-   ```
-
-### 2. Frontend
-1. Open the project root in your terminal and install dependencies:
+### 1) Frontend
+1. Install dependencies:
    ```bash
    npm install
    ```
-2. Link the frontend to your newly hosted backend by editing `src/lib/mockdrop/store.ts`:
-   ```typescript
-   // Change this to reflect your active PHP domain
-   export const endpointUrl = (id: string) => `https://yourdomain.com/backend/api/${id}`;
-   ```
-3. Run the development server (or build for production):
+2. Run development server:
    ```bash
    npm run dev
-   # or
+   ```
+3. Build for production:
+   ```bash
    npm run build
    ```
 
+### 2) Backend / Database
+1. Place the `backend/` folder in your server web root.
+2. Import `backend/db/schema.sql` into MySQL.
+3. Copy `backend/.env.example` to `backend/.env` and fill credentials.
+4. Set cleanup cron:
+   ```cron
+   * * * * * php /path/to/backend/cron/cleanup.php >> /dev/null 2>&1
+   ```
+
+### 3) Connect frontend to backend
+Update API base URL in `src/lib/api.ts`:
+
+```ts
+export const API_URL = "https://your-domain-or-ip";
+```
+
 ---
 
-## 🔌 Core Backend API Overview
+## 🔌 Core Backend API
 
-Once the backend is live, it exposes these endpoints under the `api/` route constraint:
+Current frontend integration uses these backend endpoints:
 
-| Method | Endpoint | Description |
+| Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/create` | Consumes JSON schema to establish a mock entry. Returns a unique 10-character hash ID. |
-| `GET` | `/api/{hash}` | Serves the mock JSON payload exactly as configured (including artificial delays & HTTP headers). |
-| `GET` | `/api/{hash}/logs` | Returns the recent 50 interaction logs mapped to this endpoint ID. |
-| `DELETE` | `/api/{hash}` | Secure internal endpoint to drop an active mock immediately, requires `X-Secret-Token`. |
+| `POST` | `/api/create.php` | Create a new mock endpoint and return hash/url metadata. |
+| `GET` | `/api/serve.php?hash={hash}` | Return configured JSON payload with selected delay/status/CORS behavior. |
+| `GET` | `/api/logs.php?hash={hash}` | Fetch request logs for a specific endpoint hash. |
+| `POST` / `DELETE` | `/api/delete.php` | Delete an active endpoint (implementation-dependent auth/validation). |
 
 ---
 
-## 🛡️ Security Restrictions
-- Direct directory access for `/db`, `/config`, and `/cron` is blocked via strict Apache rules.
-- SQL Injection vectors are neutralized utilizing raw PDO prepared statements parameters.
-- Built-in Rate limiting (max 60 hits / min per distinct IP per endpoint).
+## 🛡️ Security Notes
+- Sensitive backend files are isolated under `backend/` with Apache rules.
+- SQL queries use prepared statements to reduce injection risk.
+- Rate-limiting and masking behavior should be verified in your deployment config.
 
 ---
+
+## 🧪 Project Scripts
+
+```bash
+npm run dev        # Start Vite dev server
+npm run build      # Production build
+npm run preview    # Preview production build
+npm run test       # Run tests once
+npm run lint       # ESLint
+```
+
+---
+
+## 🤝 Open Source
+
+MockDrop is **FOSS** (Free and Open Source Software).  
+You are welcome to use, modify, self-host, and contribute.
+
+---
+## 👨‍💻 Developers
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/NarendraM45">
+        <img src="https://github.com/NarendraM45.png" width="100px;" alt="Narendra"/><br />
+        <sub><b>Narendra</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/KrishnakantYadav00">
+        <img src="https://github.com/KrishnakantYadav00.png" width="100px;" alt="Pablo Yadav"/><br />
+        <sub><b>Pablo (Krishnakant) Yadav</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
 > Built with ❤️ by developers, for developers.
+
+

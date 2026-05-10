@@ -49,7 +49,7 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
         <nav className="hidden md:flex items-center gap-2">
           <ThemeToggle />
           <a
-            href="https://github.com"
+            href="https://github.com/NarendraM45/mockdrop-api-gen.git"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -111,7 +111,7 @@ export const Navbar = ({ onOpenPalette }: { onOpenPalette?: () => void }) => {
           >
             <Users className="h-4 w-4" /> Devs
           </Link>
-          <a href="https://github.com" target="_blank" rel="noreferrer" className="px-3 py-2 rounded-md hover:bg-elevated text-sm flex items-center gap-2">
+          <a href="https://github.com/NarendraM45/mockdrop-api-gen.git" target="_blank" rel="noreferrer" className="px-3 py-2 rounded-md hover:bg-elevated text-sm flex items-center gap-2">
             <Github className="h-4 w-4" /> GitHub
           </a>
           <button onClick={() => scrollTo("editor")} className="btn-primary mt-2 rounded-md px-4 py-2 text-sm font-semibold">
