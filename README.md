@@ -134,5 +134,25 @@ MockDrop is **FOSS** (Free and Open Source Software).
 You are welcome to use, modify, self-host, and contribute.
 
 ---
+## 👨‍💻 Developers
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/NarendraM45">
+        <img src="https://github.com/NarendraM45.png" width="100px;" alt="Narendra"/><br />
+        <sub><b>Narendra</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/KrishnakantYadav00">
+        <img src="https://github.com/KrishnakantYadav00.png" width="100px;" alt="Pablo Yadav"/><br />
+        <sub><b>Pablo (Krishnakant) Yadav</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
 > Built with ❤️ by developers, for developers.
+
+
