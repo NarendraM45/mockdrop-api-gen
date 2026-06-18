@@ -36,6 +36,7 @@ Design payloads in a modern animated UI, keep workspace data in IndexedDB, and d
 - **Persistent Storage:** MySQL persistence via PDO prepared statements.
 - **Request Monitoring:** Endpoint-wise logs with timestamp and response time.
 - **Automated Cleanup:** Cron-based expiry cleanup for stale mocks.
+- **Built-in Security:** Rate limiting, payload size caps, and Cloudflare Turnstile CAPTCHA integration out of the box.
 
 ---
 
@@ -81,8 +82,9 @@ MockDrop is currently deployed on **AWS EC2 `t3.micro`**:
 ### 2) Backend / Database
 1. Place the `backend/` folder in your server web root.
 2. Import `backend/db/schema.sql` into MySQL.
-3. Copy `backend/.env.example` to `backend/.env` and fill credentials.
-4. Set cleanup cron:
+3. Copy `backend/.env.example` to `backend/.env` and fill in your database credentials and `TURNSTILE_SECRET`.
+4. (Optional) Update `TURNSTILE_SITE_KEY` inside `src/components/mockdrop/Editor.tsx` with your public Cloudflare key.
+5. Set cleanup cron:
    ```cron
    * * * * * php /path/to/backend/cron/cleanup.php >> /dev/null 2>&1
    ```
@@ -110,9 +112,12 @@ Current frontend integration uses these backend endpoints:
 ---
 
 ## 🛡️ Security Notes
-- Sensitive backend files are isolated under `backend/` with Apache rules.
-- SQL queries use prepared statements to reduce injection risk.
-- Rate-limiting and masking behavior should be verified in your deployment config.
+- **CAPTCHA Protection:** Cloudflare Turnstile invisible CAPTCHA is integrated to prevent bot spam on endpoint creation.
+- **Rate Limiting:** Built-in IP-based rate limiting (15 creates/min, 60 requests/min).
+- **Payload Caps:** Endpoints are strictly capped at 50KB JSON payloads to prevent disk exhaustion.
+- **Hardened Setup:** We recommend running behind strict Apache headers (CSP, HSTS) and isolated DB privileges (No DROP/ALTER).
+- **Database Safety:** SQL queries use prepared statements to eliminate SQL injection risks.
+- **Isolation:** Sensitive backend files (`.env`, config) are isolated under `backend/` using Apache `.htaccess` rules.
 
 ---
 
