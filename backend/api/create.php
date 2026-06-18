@@ -16,9 +16,50 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/ratelimit.php';
 
 try {
+    // Rate limit: 15 creates per IP per minute
+    rateLimit('create', 15, 60);
+
+    // ── Cloudflare Turnstile CAPTCHA verification ─────────────────────────
+    $captchaToken = $data['captcha_token'] ?? '';
+    if (empty($captchaToken)) {
+        http_response_code(403);
+        echo json_encode(["success" => false, "error" => "CAPTCHA token missing"]);
+        exit;
+    }
+
+    $tsSecret = getenv('TURNSTILE_SECRET') ?: $_ENV['TURNSTILE_SECRET'] ?? '';
+    $tsResponse = file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false,
+        stream_context_create(['http' => [
+            'method'  => 'POST',
+            'header'  => 'Content-Type: application/x-www-form-urlencoded',
+            'content' => http_build_query([
+                'secret'   => $tsSecret,
+                'response' => $captchaToken,
+                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+            ]),
+            'timeout' => 5,
+        ]])
+    );
+    $tsResult = json_decode($tsResponse ?: '{}', true);
+    if (empty($tsResult['success'])) {
+        http_response_code(403);
+        echo json_encode(["success" => false, "error" => "CAPTCHA verification failed — are you a bot?"]);
+        exit;
+    }
+    // ── End CAPTCHA verification ──────────────────────────────────────────
+
     $input = file_get_contents('php://input');
+
+    // Reject payloads over 50 KB
+    if (strlen($input) > 51200) {
+        http_response_code(413);
+        echo json_encode(["success" => false, "error" => "Payload too large (max 50KB)"]);
+        exit;
+    }
+
     $data = json_decode($input, true);
 
     if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
@@ -47,6 +88,7 @@ try {
 
     $delayMs = isset($data['delay_ms']) ? (int)$data['delay_ms'] : 0;
     if ($delayMs < 0) $delayMs = 0;
+    if ($delayMs > 5000) $delayMs = 5000; // cap at 5s max
 
     $corsEnabled = isset($data['cors_enabled']) ? (bool)$data['cors_enabled'] : true;
     
