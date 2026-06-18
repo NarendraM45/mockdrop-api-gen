@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets and scripts
+*.pem
+*.sh
+.env
+backend/.env
