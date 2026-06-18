@@ -12,8 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/ratelimit.php';
 
 try {
+    // Rate limit: 60 serve requests per IP per minute
+    rateLimit('serve', 60, 60);
+
     $hash = $_GET['hash'] ?? '';
     if (!$hash || !preg_match('/^[a-f0-9]{10}$/i', $hash)) {
         http_response_code(404);
