@@ -11,7 +11,7 @@ type Ctx = {
   active: Endpoint | null;
   loading: boolean;
   selectEndpoint: (id: string | null) => void;
-  upsertEndpoint: (e: Endpoint) => Promise<void>;
+  upsertEndpoint: (e: Endpoint, captchaToken?: string) => Promise<void>;
   createEndpoint: (partial?: Partial<Endpoint>) => Promise<Endpoint>;
   duplicateEndpoint: (id: string) => Promise<Endpoint | null>;
   deleteEndpoint: (id: string) => Promise<void>;
@@ -131,10 +131,10 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     })();
   }, [refresh, refreshLogs]);
 
-  const upsertEndpoint = useCallback(async (e: Endpoint) => {
+  const upsertEndpoint = useCallback(async (e: Endpoint, captchaToken?: string) => {
     const updatedAt = Date.now();
     try {
-      const data = await createEndpointOnBackend(e);
+      const data = await createEndpointOnBackend(e, captchaToken);
       const hash = data.hash ?? e.id;
 
       if (hash !== e.id) await store.deleteEndpoint(e.id);

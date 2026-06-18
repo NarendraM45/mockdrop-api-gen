@@ -26,7 +26,10 @@ export type CreateBackendResponse = {
   error?: string;
 };
 
-export const createEndpointOnBackend = async (e: Endpoint): Promise<CreateBackendResponse & { hash: string }> => {
+export const createEndpointOnBackend = async (
+  e: Endpoint,
+  captchaToken?: string
+): Promise<CreateBackendResponse & { hash: string }> => {
   const res = await fetch(`${API_URL}/api/create.php`, {
     method: "POST",
     headers: {
@@ -39,6 +42,7 @@ export const createEndpointOnBackend = async (e: Endpoint): Promise<CreateBacken
       delay_ms: e.delay,
       cors_enabled: e.cors,
       expiry: mapExpiryToBackend(e.expiry),
+      ...(captchaToken ? { captcha_token: captchaToken } : {}),
     }),
   });
 
