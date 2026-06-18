@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   Wand2,
   Trash2,
@@ -13,9 +13,12 @@ import {
   Info,
   Share2,
   Save,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { Turnstile } from "@marsidev/react-turnstile";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { useWorkspace } from "@/lib/mockdrop/workspace";
 import { endpointUrl } from "@/lib/mockdrop/store";
 import { buildShareUrl } from "@/lib/mockdrop/share";
@@ -23,6 +26,8 @@ import { MonacoJsonEditor } from "./MonacoJsonEditor";
 import { FakerMenu } from "./FakerMenu";
 import { RequestSimulator } from "./RequestSimulator";
 import { SnippetPanel } from "./SnippetPanel";
+
+const TURNSTILE_SITE_KEY = "0x4AAAAAADnVE1U-8NhbmbyR";
 
 const HAS_CELEBRATED_KEY = "mockdrop:celebrated";
 
@@ -54,6 +59,22 @@ export const Editor = () => {
   const [dirty, setDirty] = useState(false);
   const lastActiveId = useRef<string | null>(null);
 
+  // Turnstile
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const captchaToken = useRef<string | null>(null);
+  const [captchaReady, setCaptchaReady] = useState(false);
+
+  const onTurnstileSuccess = useCallback((token: string) => {
+    captchaToken.current = token;
+    setCaptchaReady(true);
+  }, []);
+
+  const onTurnstileExpire = useCallback(() => {
+    captchaToken.current = null;
+    setCaptchaReady(false);
+    turnstileRef.current?.reset();
+  }, []);
+
   // Sync draft when active endpoint changes
   useEffect(() => {
     if (active && active.id !== lastActiveId.current) {
@@ -79,8 +100,17 @@ export const Editor = () => {
       toast.error("Fix JSON before saving");
       return;
     }
+    if (!captchaToken.current) {
+      toast.error("CAPTCHA not verified yet — please wait a moment");
+      turnstileRef.current?.reset();
+      return;
+    }
     setSaving(true);
-    await upsertEndpoint(draft);
+    await upsertEndpoint(draft, captchaToken.current);
+    // Reset turnstile so next save gets a fresh token
+    captchaToken.current = null;
+    setCaptchaReady(false);
+    turnstileRef.current?.reset();
     setDirty(false);
     setSaving(false);
 
@@ -175,13 +205,34 @@ export const Editor = () => {
             >
               <Share2 className="h-3.5 w-3.5" /> Share
             </button>
+            {/* Hidden Turnstile widget — invisible to user, fires onTurnstileSuccess automatically */}
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={TURNSTILE_SITE_KEY}
+              onSuccess={onTurnstileSuccess}
+              onExpire={onTurnstileExpire}
+              onError={(err) => { 
+                console.error("Turnstile error:", err);
+                toast.error(`CAPTCHA error: ${err ? String(err) : "Check console"}`);
+                captchaToken.current = null; 
+                setCaptchaReady(false); 
+              }}
+              options={{ size: "invisible", refreshExpired: "auto" }}
+            />
             <button
               onClick={save}
-              disabled={!validation.valid || saving}
-              className="btn-primary inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-semibold"
+              disabled={!validation.valid || saving || !captchaReady}
+              title={!captchaReady ? "Verifying you're human…" : "Save endpoint (Ctrl+Enter)"}
+              className="btn-primary inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : !captchaReady ? (
+                <ShieldCheck className="h-4 w-4 animate-pulse" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {!captchaReady && !saving ? "Verifying…" : "Save"}
             </button>
           </div>
         </div>
