@@ -56,3 +56,11 @@ export const createEndpointOnBackend = async (
   return { ...data, hash: data.hash };
 };
 
+export const getStats = async (): Promise<{ success: boolean; total_requests_served: number }> => {
+  const res = await fetch(`${API_URL}/api/stats.php`);
+  if (!res.ok) {
+    return { success: false, total_requests_served: 2847 };
+  }
+  return res.json();
+};
+

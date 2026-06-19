@@ -1,0 +1,79 @@
+﻿You are upgrading MockDrop's landing page animations. I've sent you screenshots.
+The site uses React + Vite + TypeScript + Tailwind CSS with a dark purple theme.
+Color palette: bg ~#0d0d1a, cards ~#141428, border ~#2a2a3f, primary #7c3aed / #a855f7.
+
+DO NOT TOUCH: the Three.js hero section, any routing, any API calls, the Monaco editor page.
+
+START by running: grep -r "Zero Setup\|Live Validation\|Paste JSON\|Three steps" src/
+This finds all target component files. Read every found file fully before writing any code.
+
+═══ TASK 1: FEATURE CARDS (cards with Zero Setup, Live Validation, etc.) ═══
+
+A. Add @property --md-angle and these @keyframes to the global CSS file:
+   md-border-spin, md-rocket-launch, md-rocket-land, md-shield-draw,
+   md-scan-beam, md-glow-pulse, md-orbit, md-chain-lock, md-float-data
+
+B. Give every feature card:
+   - Animated conic-gradient border that spins on hover (via ::before pseudo, @property trick)
+   - translateY(-8px) lift with cubic-bezier(0.34,1.56,0.64,1) spring
+   - Purple glow box-shadow on hover: 0 8px 40px -8px rgba(168,85,247,0.45)
+   - A 1px scan beam (::after) that sweeps top→bottom on hover
+
+C. Replace each card's static icon with an inline SVG (NO Lucide, NO external lib):
+   ZERO SETUP: Rocket SVG that launches upward (translateY -18px, rotates -15deg) on hover, returns on hover end
+   LIVE VALIDATION: Shield + checkmark where the check PATH draws via stroke-dashoffset 12→0 on hover, stroke turns #4ade80
+   CUSTOM STATUS CODES: Add a monospace badge (top-right, absolute) that cycles "200"→"404"→"500"→"201" every 150ms while hovered. Use setInterval in onMouseEnter, clearInterval in onMouseLeave.
+   RESPONSE DELAY: Hourglass SVG where a  animates height 0→4px on hover (CSS transition)
+   CORS READY: Globe with an ellipse orbit ring that gets animation:md-orbit 2s linear infinite on hover
+   PERSISTENT URLS: Link chain SVG where the right link translateX(6px→0) slides into place on hover
+
+═══ TASK 2: HOW IT WORKS STEPS ═══
+
+A. Replace the three static step icons with animated inline SVGs:
+   STEP 01 (Paste JSON): Two monospace curly braces { } that spread apart then close, revealing tiny "id:42" text inside
+   STEP 02 (Generate URL): A small URL bar rect that typewriters "mockdrop.io/ab3f" on hover with 55ms per char
+   STEP 03 (Hit the API): Three concentric circles that scale outward + fade like sonar pings, staggered 0s / 0.4s / 0.8s
+
+B. Step number scrambler: create AnimatedStepNumber component.
+   On mouseenter: run 6 iterations of random 2-digit numbers at 40ms intervals, then snap to target (01/02/03).
+
+C. SVG flow connector between the 3 cards (place it in the gap/space):
+   Use SVG  with  — 3 purple dots of decreasing size travel left-to-right along a gentle wave path continuously. This makes the section feel "alive" at all times, not just on hover.
+
+D. Card entrance animations triggered by IntersectionObserver:
+   Card 01: slideInLeft (translateX -40px → 0, opacity 0→1, 0.5s)
+   Card 02: fadeSlideUp (translateY 32px → 0, opacity 0→1, delay 0.12s)
+   Card 03: slideInRight (translateX 40px → 0, opacity 0→1, delay 0.24s)
+
+═══ TASK 3: SECTION POLISH ═══
+
+A. Features section wrapper: add animated dot-grid background via CSS ::before
+   radial-gradient(circle, rgba(124,58,237,0.12) 1px, transparent 1px) 28px 28px
+   Animate background-position Y from 0 to 280px over 25s (md-grid-pan)
+
+B. Section label pills ("FEATURES", "HOW IT WORKS"):
+   Add an underline that draws left-to-right (width 0→100%) when section enters viewport via IntersectionObserver.
+
+C. Large headings ("Everything you need...", "Three steps. Zero friction."):
+   Split text into word spans in JSX. Each word: opacity 0 → 1, translateY 24px → 0, staggered at 50ms per word.
+   Trigger via IntersectionObserver.
+
+D. Footer: Add  as first footer child.
+   CSS: 1px height, background: linear-gradient(90deg, transparent, #7c3aed, #a855f7, transparent) animated left→right sweep (4s infinite).
+
+E. Recent Activity empty state: Replace static center icon with a sonar radar version.
+   3 rings pulse outward from the icon with staggered delays (0s, 0.5s, 1s). Purple, fading to transparent.
+
+═══ TASK 4: useScrollReveal HOOK ═══
+
+Create src/hooks/useScrollReveal.ts:
+- Takes { threshold = 0.15, delay = 0, rootMargin = "0px 0px -40px 0px", once = true }
+- Returns { ref, isVisible }
+- Uses IntersectionObserver, disconnects after first trigger if once=true
+- Always checks prefers-reduced-motion before applying
+
+═══ DELIVERY ═══
+Do each task in order. After EACH task, show me:
+1. Which files you modified
+2. The key CSS/JSX changes (diff format)
+3. What it looks like behaviorally
