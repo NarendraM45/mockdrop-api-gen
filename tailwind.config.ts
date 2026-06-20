@@ -87,6 +87,10 @@ export default {
           "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "fade-out": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
         "slide-up-spring": {
           "0%": { opacity: "0", transform: "translateY(40px) scale(0.96)" },
           "60%": { opacity: "1", transform: "translateY(-4px) scale(1.01)" },
