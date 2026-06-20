@@ -1,13 +1,6 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import {
-  Rocket,
-  ShieldCheck,
-  AlertOctagon,
-  Timer,
-  Globe,
-  Database,
-} from "lucide-react";
+import { Rocket, ShieldCheck, OctagonAlert as AlertOctagon, Timer, Globe, Database } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { AnimatedUnderline } from "./shared/AnimatedUnderline";
