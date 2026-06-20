@@ -116,6 +116,12 @@ export default {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        "slideRight": {
+          "0%": { left: "10%", opacity: "0" },
+          "20%": { opacity: "1" },
+          "80%": { opacity: "1" },
+          "100%": { left: "80%", opacity: "0" },
+        },
         "blink": {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0" },
