@@ -10,6 +10,39 @@ import { EndpointSidebar } from "@/components/mockdrop/EndpointSidebar";
 import { CommandPalette } from "@/components/mockdrop/CommandPalette";
 import { ShortcutsOverlay } from "@/components/mockdrop/ShortcutsOverlay";
 import { WorkspaceProvider } from "@/lib/mockdrop/workspace";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const PortalWrapper = ({ children }: { children: React.ReactNode }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // We want to pin the container, and scrub through the animations.
+    // The animations for the blob expanding and the features revealing will be hooked to this ScrollTrigger.
+    // We will set up a global ScrollTrigger that we can read from Hero and Features, or just let them use their own triggers on this container.
+    
+    const st = ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: "top top",
+      end: "+=2000", // 2000px of scrolling for the portal effect
+      pin: true,
+      id: "portal-pin"
+    });
+
+    return () => st.kill();
+  }, []);
+
+  return (
+    <div ref={containerRef} id="portal-wrapper" className="relative w-full h-screen overflow-hidden">
+      {children}
+    </div>
+  );
+};
 
 const IndexInner = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -41,12 +74,22 @@ const IndexInner = () => {
       <div className="flex flex-1 pt-16">
         <EndpointSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((v) => !v)} />
         <main className="flex-1 min-w-0">
-          <Hero />
-          <Editor />
-          <HowItWorks />
-          <Features />
-          <ActivityLog />
-          <Footer />
+          <PortalWrapper>
+            <div className="absolute inset-0 z-10 w-full h-full">
+              <Hero />
+            </div>
+            <div className="absolute inset-0 z-20 w-full h-full pointer-events-none" id="features-portal">
+              <div className="w-full h-full overflow-y-auto pointer-events-auto">
+                <Features />
+              </div>
+            </div>
+          </PortalWrapper>
+          <div className="relative z-30 bg-background">
+            <HowItWorks />
+            <Editor />
+            <ActivityLog />
+            <Footer />
+          </div>
         </main>
       </div>
       <CommandPalette
