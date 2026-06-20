@@ -23,43 +23,35 @@ try {
     rateLimit('create', 15, 60);
 
     // ── Cloudflare Turnstile CAPTCHA verification ─────────────────────────
-    $input = file_get_contents('php://input');
-    $data = json_decode($input, true) ?: [];
-    
     $captchaToken = $data['captcha_token'] ?? '';
-    
-    $isDemo = ($captchaToken === 'demo-try-it' && strlen($input) < 150);
+    if (empty($captchaToken)) {
+        http_response_code(403);
+        echo json_encode(["success" => false, "error" => "CAPTCHA token missing"]);
+        exit;
+    }
 
-    if (!$isDemo) {
-        if (empty($captchaToken)) {
-            http_response_code(403);
-            echo json_encode(["success" => false, "error" => "CAPTCHA token missing"]);
-            exit;
-        }
-
-        $tsSecret = getenv('TURNSTILE_SECRET') ?: $_ENV['TURNSTILE_SECRET'] ?? '';
-        if (!empty($tsSecret)) {
-            $tsResponse = file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false,
-                stream_context_create(['http' => [
-                    'method'  => 'POST',
-                    'header'  => 'Content-Type: application/x-www-form-urlencoded',
-                    'content' => http_build_query([
-                        'secret'   => $tsSecret,
-                        'response' => $captchaToken,
-                        'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
-                    ]),
-                    'timeout' => 5,
-                ]])
-            );
-            $tsResult = json_decode($tsResponse ?: '{}', true);
-            if (empty($tsResult['success'])) {
-                http_response_code(403);
-                echo json_encode(["success" => false, "error" => "CAPTCHA verification failed — are you a bot?"]);
-                exit;
-            }
-        }
+    $tsSecret = getenv('TURNSTILE_SECRET') ?: $_ENV['TURNSTILE_SECRET'] ?? '';
+    $tsResponse = file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false,
+        stream_context_create(['http' => [
+            'method'  => 'POST',
+            'header'  => 'Content-Type: application/x-www-form-urlencoded',
+            'content' => http_build_query([
+                'secret'   => $tsSecret,
+                'response' => $captchaToken,
+                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+            ]),
+            'timeout' => 5,
+        ]])
+    );
+    $tsResult = json_decode($tsResponse ?: '{}', true);
+    if (empty($tsResult['success'])) {
+        http_response_code(403);
+        echo json_encode(["success" => false, "error" => "CAPTCHA verification failed — are you a bot?"]);
+        exit;
     }
     // ── End CAPTCHA verification ──────────────────────────────────────────
+
+    $input = file_get_contents('php://input');
 
     // Reject payloads over 50 KB
     if (strlen($input) > 51200) {
@@ -67,6 +59,8 @@ try {
         echo json_encode(["success" => false, "error" => "Payload too large (max 50KB)"]);
         exit;
     }
+
+    $data = json_decode($input, true);
 
     if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
         http_response_code(400);
