@@ -1,4 +1,8 @@
 import { Code2, Zap, MousePointerClick } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { TypographicBurst } from "./TypographicBurst";
 
 const STEPS = [
   {
@@ -19,13 +23,35 @@ const STEPS = [
 ];
 
 export const HowItWorks = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    if (sectionRef.current) {
+      gsap.fromTo(
+        sectionRef.current,
+        { clipPath: "circle(0% at 0% 100%)" },
+        {
+          clipPath: "circle(150% at 0% 100%)",
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "top 30%",
+            scrub: 1,
+          }
+        }
+      );
+    }
+  }, []);
+
   return (
-    <section id="how-it-works" className="relative py-20 md:py-28">
+    <section ref={sectionRef} id="how-it-works" className="relative py-20 md:py-28" style={{ zIndex: 30 }}>
       <div className="container">
         <div className="text-center mb-14">
           <p className="text-xs uppercase tracking-widest text-primary-glow font-semibold">How it works</p>
           <h2 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight">
-            Three steps. Zero friction.
+            Three steps<TypographicBurst type="pulse">.</TypographicBurst> Zero friction<TypographicBurst type="burst">.</TypographicBurst>
           </h2>
         </div>
 

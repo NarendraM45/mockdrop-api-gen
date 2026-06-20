@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
@@ -241,8 +242,10 @@ export default function HeroBlobCanvas({ textRefs }) {
     composer.addPass(bloom);
 
     /* ════════════════════════════════════════════════════════════════════════
-       GSAP — ENTRANCE + LOOP
+       GSAP — ENTRANCE + LOOP + SCROLL
        ════════════════════════════════════════════════════════════════════════ */
+    gsap.registerPlugin(ScrollTrigger);
+    
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
     // Ensure opacity is zero before animation starts
@@ -291,6 +294,41 @@ export default function HeroBlobCanvas({ textRefs }) {
         bloom.strength  = loopState.bloom;
       },
     });
+
+    /* Scroll-Driven Portal Expansion */
+    const scrollTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#portal-wrapper",
+        start: "top top",
+        end: "+=2000",
+        scrub: 1,
+      }
+    });
+
+    // Animate the blob expanding
+    scrollTl.to(blob.scale, {
+      x: 6.0,
+      y: 6.0,
+      z: 6.0,
+      ease: "power2.inOut",
+      duration: 1
+    }, 0).to(blob.position, {
+      x: 0, // Move to center
+      y: 0,
+      ease: "power2.inOut",
+      duration: 1
+    }, 0).to(blobU.uEm, {
+      value: 2.0, // Make it very bright as it expands
+      ease: "power2.inOut",
+      duration: 1
+    }, 0);
+
+    // Animate the features portal peeling open (downward pour)
+    scrollTl.fromTo("#features-portal", 
+      { clipPath: "circle(0% at 50% 0%)" },
+      { clipPath: "circle(150% at 50% 0%)", ease: "power2.inOut", duration: 0.8 },
+      0.2 // start slightly after the blob starts expanding
+    );
 
     /* ════════════════════════════════════════════════════════════════════════
        SUBTLE MOUSE PARALLAX — blob drifts very gently toward cursor
@@ -357,6 +395,8 @@ export default function HeroBlobCanvas({ textRefs }) {
         renderer.dispose();
         scene.clear();
         tl.kill();
+        scrollTl.kill();
+        ScrollTrigger.getAll().forEach(t => t.kill());
         gsap.killTweensOf(loopState);
         if (canvasRef.current && renderer.domElement) {
             try {
