@@ -3,9 +3,8 @@ import { Card } from "@/components/ui/card";
 import { RocketIcon } from "@/components/svg/RocketIcon";
 import { BadgeIcon } from "@/components/svg/BadgeIcon";
 import { HourglassIcon } from "@/components/svg/HourglassIcon";
-import { GlobeIcon } from "@/components/svg/GlobeIcon";
 import { ShieldIcon } from "@/components/svg/ShieldIcon";
-import { ChainIcon } from "@/components/svg/ChainIcon";
+import { Globe, Link as ChainIcon, AlertCircle, ArrowRightLeft, RefreshCw, Server, Laptop } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const BaseCard = ({ title, desc, delay, icon: Icon, children }: any) => {
@@ -94,7 +93,7 @@ export const CustomStatusCard = ({ delay }: { delay: number }) => {
             <div
               key={i}
               className={`absolute inset-0 flex items-center justify-center text-2xl font-bold font-mono transition-transform duration-500 ${color}`}
-              style={{ transform: \`translateY(\${(i - idx) * 100}%)\` }}
+              style={{ transform: `translateY(${(i - idx) * 100}%)` }}
             >
               {c}
             </div>
@@ -130,7 +129,7 @@ export const ResponseDelayCard = ({ delay }: { delay: number }) => {
     <BaseCard title="Response Delay" desc="Add up to 3 seconds of delay to test your loading states." icon={HourglassIcon} delay={delay}>
       <div className="flex flex-col items-center justify-center w-full px-4 gap-2">
         <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-          <div className="bg-primary h-full" style={{ width: \`\${progress}%\` }} />
+          <div className="bg-primary h-full" style={{ width: `${progress}%` }} />
         </div>
         <div className="text-[10px] font-mono text-muted-foreground text-center">
           Simulating {Math.round((progress / 100) * 3000)}ms latency...
@@ -140,11 +139,105 @@ export const ResponseDelayCard = ({ delay }: { delay: number }) => {
   );
 };
 
-export const StaticCard = ({ title, desc, icon: Icon, delay }: any) => {
+export const LiveValidationCard = ({ delay }: { delay: number }) => {
+  const [hasError, setHasError] = useState(false);
+  const [text, setText] = useState('{\n  "name": "John"\n  "age": 30\n}');
+
+  useEffect(() => {
+    let t: any;
+    const loop = () => {
+      setHasError(false);
+      setText('{\n  "name": "John",\n  "age": 30\n}');
+      
+      t = setTimeout(() => {
+        // Simulate typo by removing the comma
+        setText('{\n  "name": "John"\n  "age": 30\n}');
+        setTimeout(() => setHasError(true), 200); // instantly pop error
+        
+        t = setTimeout(loop, 2500);
+      }, 1500);
+    };
+    loop();
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <BaseCard title={title} desc={desc} icon={Icon} delay={delay}>
-      <div className="flex items-center justify-center h-full opacity-50">
-        <Icon className="h-12 w-12 text-primary/20" />
+    <BaseCard title="Live Validation" desc="Invalid JSON is caught before saving — line numbers and all." icon={ShieldIcon} delay={delay}>
+      <div className="relative h-full flex flex-col justify-center">
+        <pre className="text-xs text-slate-300 font-mono">
+          <code>
+            {`{\n  "name": "John"`}
+            <span className={`relative inline-block transition-colors ${hasError ? 'text-destructive underline decoration-wavy decoration-destructive underline-offset-4' : ''}`}>
+              {hasError ? '' : ','}
+            </span>
+            {`\n  "age": 30\n}`}
+          </code>
+        </pre>
+        {hasError && (
+          <div className="absolute top-0 right-0 bg-destructive/10 text-destructive border border-destructive/20 rounded px-2 py-1 text-[10px] font-mono animate-in fade-in zoom-in flex items-center gap-1 shadow-glow shadow-destructive/20">
+            <AlertCircle className="h-3 w-3" />
+            Expected comma
+          </div>
+        )}
+      </div>
+    </BaseCard>
+  );
+};
+
+export const CorsReadyCard = ({ delay }: { delay: number }) => {
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setSending(true);
+      setTimeout(() => setSending(false), 1500);
+    }, 2500);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <BaseCard title="CORS Ready" desc="Allow-any-origin headers built in. Works from any frontend." icon={Globe} delay={delay}>
+      <div className="flex items-center justify-between h-full px-2">
+        <div className="flex flex-col items-center gap-2 z-10">
+          <div className="bg-surface border border-border p-2 rounded shadow-lg">
+            <Laptop className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <span className="text-[9px] font-mono text-muted-foreground">localhost:3000</span>
+        </div>
+        
+        <div className="flex-1 relative flex items-center justify-center h-full">
+          <div className="absolute w-full h-[1px] bg-border/50 border-dashed border-t border-border/50" />
+          {sending && (
+            <div className="absolute z-20 h-2 w-4 bg-primary rounded-full shadow-glow animate-[slideRight_1.5s_ease-in-out_infinite]" />
+          )}
+          {sending && (
+             <div className="absolute top-1 text-[8px] font-mono text-success animate-in fade-in zoom-in duration-300 delay-700">200 OK</div>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center gap-2 z-10">
+          <div className="bg-surface border border-primary/30 p-2 rounded shadow-glow">
+            <Server className="h-5 w-5 text-primary" />
+          </div>
+          <span className="text-[9px] font-mono text-primary-glow">mockdrop.api</span>
+        </div>
+      </div>
+    </BaseCard>
+  );
+};
+
+export const PersistentUrlCard = ({ delay }: { delay: number }) => {
+  return (
+    <BaseCard title="Persistent URLs" desc="Endpoints survive page reloads. Share them with your team." icon={ChainIcon} delay={delay}>
+      <div className="flex flex-col items-center justify-center h-full gap-4 relative">
+        <div className="bg-black/80 border border-border/50 text-slate-300 px-3 py-2 rounded-md text-xs font-mono w-full text-center relative overflow-hidden z-10">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-[shimmer_2s_infinite]" />
+          mockdrop.duckdns.org/api/x9f2a
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground group">
+          <RefreshCw className="h-4 w-4 animate-spin-slow text-primary" style={{ animationDuration: '3s' }} />
+          <span className="text-[10px] uppercase tracking-wider font-semibold">Survives Reloads</span>
+        </div>
       </div>
     </BaseCard>
   );
