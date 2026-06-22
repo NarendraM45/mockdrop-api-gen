@@ -252,7 +252,7 @@ export const Hero = () => {
 
           <div className="mt-10 flex justify-center md:justify-start">
             <MagneticButton
-              onClick={scrollToEditor}
+              onClick={goApp}
               className="glow-border inline-flex items-center gap-2 rounded-md px-6 py-3.5 text-base font-semibold text-white"
               as="button"
             >
